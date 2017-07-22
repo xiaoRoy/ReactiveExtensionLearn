@@ -7,6 +7,7 @@ import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Action;
 import io.reactivex.functions.Consumer;
+import io.reactivex.subscribers.ResourceSubscriber;
 
 public class Subscribing {
 
@@ -81,10 +82,30 @@ public class Subscribing {
     private void unSubscribeWithSubscriber(){
         Observable<Tweet> tweetObservable = Observable.create(new ObservableOnSubscribe<Tweet>() {
             @Override
-            public void subscribe(ObservableEmitter<Tweet> e) throws Exception {
-
+            public void subscribe(ObservableEmitter<Tweet> emitter) throws Exception {
+                Tweet tweet = new Tweet();
+                tweet.setTag("java");
+                emitter.onNext(tweet);
             }
         });
 
+        ResourceSubscriber<Tweet> subscriber = new ResourceSubscriber<Tweet>() {
+            @Override
+            public void onNext(Tweet tweet) {
+                if(tweet.getTag().contains("java")){
+                    unSubscribe();
+                }
+            }
+
+            @Override
+            public void onError(Throwable t) {
+
+            }
+
+            @Override
+            public void onComplete() {
+
+            }
+        };
     }
 }
