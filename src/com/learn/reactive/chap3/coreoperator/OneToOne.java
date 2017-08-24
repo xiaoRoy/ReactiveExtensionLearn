@@ -8,13 +8,14 @@ public class OneToOne {
         new OneToOne().doOnNext();
     }
 
-    private void doOnNext(){
+    private void doOnNext() {
         Observable.just(8, 9, 10)
-            .doOnNext(integer -> System.out.println("firstDoOnNext:" + integer ))
-            .filter(integer -> integer % 3 > 0)
-            .map(integer -> "number" + (integer * 10))
-            .doOnNext(string -> System.out.println("secondDoOnNext:" + string))
-            .subscribe(result -> System.out.println("result:" + result));
+                .doOnNext(integer -> System.out.println("firstDoOnNext:" + integer))
+                .filter(integer -> integer % 3 > 0)
+                .doOnNext(integer -> System.out.println("secondDoOnNext:" + integer))
+                .map(integer -> "number" + (integer * 10))
+                .doOnNext(string -> System.out.println("thirdDoOnNext:" + string))
+                .subscribe(result -> System.out.println("result:" + result));
     }
 
 }
