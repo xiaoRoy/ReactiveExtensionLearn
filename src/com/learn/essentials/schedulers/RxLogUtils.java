@@ -36,6 +36,12 @@ public class RxLogUtils {
         };
     }
 
+    static <T> Consumer<Notification<? super T>> log(String description){
+        return log(description, "");
+    }
+
+
+
     public static void main(String[] args) throws InterruptedException {
         Observable
             .range(5, 5)
