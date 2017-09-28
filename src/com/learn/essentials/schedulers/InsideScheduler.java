@@ -61,6 +61,7 @@ public class InsideScheduler {
 			System.out.println("End of work!");
 		};
 		worker.schedule(work);
+		System.out.println("Last Line");
 	}
 
 	private static String currentThreadName(){
@@ -77,7 +78,7 @@ public class InsideScheduler {
 
 	private void testNewThread(){
 		Scheduler scheduler = Schedulers.newThread();
-		schedule(scheduler, 2, false);
+		schedule(scheduler, 3, false);
 	}
 
 	private void confirmNewThread(){
@@ -93,8 +94,29 @@ public class InsideScheduler {
 		}
 	}
 
+	private void testComputation(){
+		Scheduler scheduler = Schedulers.computation();
+		schedule(scheduler, 2, true);
+
+	}
+
+	private void testIO(){
+		Scheduler scheduler = Schedulers.io();
+		schedule(scheduler, 3, false);
+	}
+
+	private void confirmIO(){
+		final Runnable runnable = () ->  {
+			System.out.println(Thread.currentThread().getName());
+		};
+		Scheduler scheduler = Schedulers.io();
+		Scheduler.Worker worker = scheduler.createWorker();
+		worker.schedule(runnable);
+		worker.schedule(runnable);
+	}
+
 	public static void main(String[] args) {
-		new InsideScheduler().confirmNewThread();
+		new InsideScheduler().testNewThread();
 	}
 
 }
