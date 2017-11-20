@@ -2,8 +2,6 @@ package com.learn.playground.repeat;
 
 import io.reactivex.*;
 import io.reactivex.Observable;
-import io.reactivex.Observer;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Function;
 import io.reactivex.functions.Predicate;
 import io.reactivex.subjects.PublishSubject;
@@ -121,6 +119,28 @@ public class LearnRepeatWhen {
                 .fromArray(5, 6, 7, 9)
                 .flatMap(number -> mockBooleanServer(number))
                 .takeUntil(aBoolean -> aBoolean)
+                .subscribe();
+    }
+
+    private Observable<String> verifyUrl(String url){
+        return Observable.just("test");
+    }
+
+    private boolean parseResponse(String response){
+        return true;
+    }
+
+    private void checkWwsUrl(List<String> candidateUrlList){
+        Stack<String> checkedUrlStack = new Stack<>();
+        Observable
+                .fromIterable(candidateUrlList)
+                .doOnNext(url -> {
+                    checkedUrlStack.push(url);
+                })
+                .flatMap(url -> verifyUrl(url))
+                .map(response -> parseResponse(response))
+                .takeUntil(result -> result)
+                .map(result -> checkedUrlStack.pop())
                 .subscribe();
     }
 
