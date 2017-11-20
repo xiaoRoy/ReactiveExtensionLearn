@@ -13,7 +13,7 @@ import java.util.*;
 public class LearnRepeatWhen {
 
     public static void main(String[] args) {
-        new LearnRepeatWhen().testRepeat();
+        new LearnRepeatWhen().testRepeatC();
     }
 
     private Observable<String> mockServer() {
@@ -42,7 +42,8 @@ public class LearnRepeatWhen {
         });
     }
 
-    private Observable<Boolean> mockBooleanServer() {
+    private Observable<Boolean> mockBooleanServer(int number) {
+        System.out.println("number:" + number);
         return Observable.create(new ObservableOnSubscribe<Boolean>() {
             @Override
             public void subscribe(ObservableEmitter<Boolean> emitter) throws Exception {
@@ -56,11 +57,17 @@ public class LearnRepeatWhen {
     }
 
     private void testRepeat() {
-        mockBooleanServer()
-                .repeatWhen(new Function<Observable<Object>, ObservableSource<Integer>>() {
+        Queue<Integer> integerQueue = new ArrayDeque<>();
+        List<Integer> numbers = new ArrayList<>();
+        numbers.addAll(Arrays.asList(1, 3, 4, 6));
+        mockBooleanServer(1)
+                .repeatWhen(new Function<Observable<Object>, ObservableSource<Boolean>>() {
                     @Override
-                    public ObservableSource<Integer> apply(Observable<Object> objectObservable) throws Exception {
-                        return Observable.just(400, 401, 100, 500, 100);
+                    public ObservableSource<Boolean> apply(Observable<Object> objectObservable) throws Exception {
+                      return objectObservable
+                                .flatMap(object -> Observable
+                                        .fromIterable(numbers)
+                                        .flatMap(numbers -> mockBooleanServer(numbers)));
                     }
                 })
                 .takeUntil(new Predicate<Boolean>() {
@@ -75,18 +82,46 @@ public class LearnRepeatWhen {
     private final PublishSubject<Integer> updateSubject = PublishSubject.create();
 
     private void testRepeatB() {
-        mockIntServer().repeatWhen(new Function<Observable<Object>, ObservableSource<?>>() {
-            @Override
-            public ObservableSource<?> apply(Observable<Object> objectObservable) throws Exception {
-                objectObservable.flatMap(new Function<Object, ObservableSource<?>>() {
+        Queue<Integer> integerQueue = new ArrayDeque<>();
+        integerQueue.addAll(Arrays.asList(1, 4, 6, 7));
+        mockBooleanServer(integerQueue.peek())
+                .repeat()
+                .takeUntil(new Predicate<Boolean>() {
                     @Override
-                    public ObservableSource<?> apply(Object o) throws Exception {
-                        return null;
+                    public boolean test(Boolean aBoolean) throws Exception {
+                        return aBoolean;
+                    }
+                })
+                .subscribe(new Observer<Boolean>() {
+                    @Override
+                    public void onSubscribe(Disposable disposable) {
+                        System.out.println("onSubscribe");
+                    }
+
+                    @Override
+                    public void onNext(Boolean aBoolean) {
+                        integerQueue.remove();
+                        System.out.println("onNext");
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        System.out.println("onComplete");
                     }
                 });
-                return null;
-            }
-        });
+    }
+
+    private void testRepeatC(){
+        Observable
+                .fromArray(5, 6, 7, 9)
+                .flatMap(number -> mockBooleanServer(number))
+                .takeUntil(aBoolean -> aBoolean)
+                .subscribe();
     }
 
 }
