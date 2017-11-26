@@ -6,13 +6,14 @@ import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 public class MultiThreading {
 
     public static void main(String[] args) {
-        new MultiThreading().observerOnDifferentThread();
+        new MultiThreading().subscribeOnDifferentThread();
     }
 
     private void defaultThread(){
@@ -27,10 +28,17 @@ public class MultiThreading {
                     .map(numberToString());
     }
 
+    private void subscribeOnThread(){
+        ExecutorService executorService =
+                Executors.newSingleThreadExecutor();
+        executorService.execute(() -> getObservable().subscribe(result()));
+        executorService.shutdown();
+    }
+
     private void subscribeOnDifferentThread(){
         Observable<String> observable = getObservable();
         observable
-                .subscribeOn(Schedulers.io())
+                .subscribeOn(Schedulers.newThread())
                 .subscribeOn(Schedulers.from(Executors.newSingleThreadExecutor()))
                 .subscribe(result())
         ;
@@ -40,7 +48,7 @@ public class MultiThreading {
         Observable
                 .fromCallable(numberOne())
                 .doOnNext(doOnNext())
-                .observeOn(Schedulers.from(Executors.newSingleThreadExecutor()))
+                .subscribeOn(Schedulers.from(Executors.newSingleThreadExecutor()))
                 .map(numberToString())
                 .subscribe(result());
     }
