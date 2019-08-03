@@ -2,6 +2,8 @@ package com.learn.playground.subjectshowcase;
 
 import com.learn.model.Book;
 import io.reactivex.Observable;
+import io.reactivex.Observer;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.subjects.BehaviorSubject;
 
 public class SubjectExperiment {
@@ -12,14 +14,11 @@ public class SubjectExperiment {
 
     public SubjectExperiment(BookService bookService) {
         this.bookService = bookService;
-        bookBehaviorSubject.doOnNext(book -> {
-            System.out.println("doOnNext: bookBehaviorSubject");
-        });
     }
 
     public void startLoadBook() {
         bookService
-                .loadBook()
+                .loadBookAnother()
                 .doOnSubscribe(disposable -> {
                     System.out.println("onSubscribe");
                 })
@@ -45,9 +44,30 @@ public class SubjectExperiment {
             System.out.println(book);
         });
         subjectExperiment.startLoadBook();
-        subjectExperiment.loadBook().subscribe(book -> {
-            System.out.println("after");
-            System.out.println(book);
-        });
+        boolean hasValue = ((BehaviorSubject<Book>) subjectExperiment.loadBook()).hasValue();
+        System.out.println(hasValue);
+        subjectExperiment.loadBook()
+                .subscribe(new Observer<Book>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                        System.out.println("onSubscribe");
+                    }
+
+                    @Override
+                    public void onNext(Book book) {
+                        System.out.println("after");
+                        System.out.println(book);
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
     }
 }
