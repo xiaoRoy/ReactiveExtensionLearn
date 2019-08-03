@@ -13,6 +13,8 @@ public class BookService {
     public Observable<Book> loadBookAnother() {
         return Observable.create(emitter -> {
             emitter.onNext(new Book("123", "Sea and Sky"));
+            //subject terminated with onComplete()
+//            emitter.onComplete();
         });
     }
 }
